@@ -134,7 +134,8 @@ const help = `
 <[cmds]> <target> <[options]> <[cpps]> <watch>
 
 cmds: 	up/upload = (default) generate & upload
-	  	gen/generate = generate only
+	  	gen/generate = generate and build only
+		gen-nobuild/generate-nobuild = generate code only without building
 
 target: path to a JSON for the hardware config,
 		or simply "patch", "patch_sm", "field", "petal", "pod" etc.
@@ -327,6 +328,8 @@ function run() {
 			case "help": {console.log(help); process.exit(0);} break;
 			case "generate":
 			case "gen": action="generate"; break;
+			case "generate-nobuild":
+			case "gen-nobuild": action="generate-nobuild"; break;
 			case "upload":
 			case "up": action="upload"; break;
 
@@ -623,7 +626,9 @@ CPPFLAGS+=-O3 -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-var
 	console.log(`Will ${action} from ${cpps.join(", ")} by writing to:`)
 	console.log(`\t${maincpp_path}`)
 	console.log(`\t${makefile_path}`)
-	console.log(`\t${bin_path}`)
+	if (action!="generate-nobuild") {
+		console.log(`\t${bin_path}`)
+	}
 
 	// add watcher
 	if (watch && watchers.length < 1) {
@@ -690,6 +695,11 @@ int main(void) {
 	fs.writeFileSync(maincpp_path, cppcode, "utf-8");
 
 	console.log("oopsy generated code")
+
+	if (action=="generate-nobuild") {
+		console.log("oopsy skipping build step")
+		return;
+	}
 
 	// now try to make:
 	try {
