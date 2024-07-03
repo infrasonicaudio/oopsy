@@ -600,6 +600,7 @@ function run() {
 	fs.writeFileSync(makefile_path, `
 # Project Name
 TARGET = ${build_name}
+${hardware.app_type ? `APP_TYPE = ${hardware.app_type}` : ``}
 # Sources -- note, won't work with paths with spaces
 CPP_SOURCES = ${posixify_path(path.relative(build_path, maincpp_path).replace(" ", "\\ "))}
 ${includes.length > 0 ? `C_INCLUDES = ${includes.join('\\\n')}` : ``}
