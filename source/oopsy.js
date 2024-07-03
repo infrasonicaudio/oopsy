@@ -631,6 +631,7 @@ function run() {
 	const makefile_path = path.join(build_path, `Makefile`)
 	const bin_path = path.join(build_path, "build", build_name+".bin");
 	const maincpp_path = path.join(build_path, `${build_name}_${target}.cpp`);
+	const oopsy_src_path = posixify_path(path.relative(build_path, __dirname)).replace(" ", "\\ ")
 	const includes = hardware.includes.map(
 		item => `-I"${posixify_path(path.relative(build_path, item))}"`);
 
@@ -704,11 +705,11 @@ ${hardware.struct}
 
 using json2daisy::Daisy;
 
-${hardware.inserts.filter(o => o.where == "header").map(o => o.code).join("\n")}
-#include "../genlib_daisy.h"
-#include "../genlib_daisy.cpp"
-
 ${apps.map(app => `#include "${posixify_path(path.relative(build_path, app.path))}"`).join("\n")}
+${hardware.inserts.filter(o => o.where == "header").map(o => o.code).join("\n")}
+#include "${oopsy_src_path}/genlib_daisy.h"
+#include "${oopsy_src_path}/genlib_daisy.cpp"
+
 ${apps.map(app => app.cpp.struct).join("\n")}
 
 // store apps in a union to re-use memory, since only one app is active at once:
