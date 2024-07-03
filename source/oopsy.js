@@ -159,7 +159,7 @@ watch:	script will not terminate
 
 --build_path=<path>: set custom build path for output
 
---libdaisy_path=<path>: set custom path to libDaisy (used verbatim in makefile)
+--libdaisy_path=<path>: set custom path to libDaisy
 
 `
 
