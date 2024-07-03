@@ -156,6 +156,11 @@ cpps: 	paths to the gen~ exported cpp files
 
 watch:	script will not terminate
 		actions will be re-run each time any of the cpp files are modified
+
+--build_path=<path>: set custom build path for output
+
+--libdaisy_path=<path>: set custom path to libDaisy (used verbatim in makefile)
+
 `
 
 const component_defs = {
@@ -310,6 +315,8 @@ function run() {
 	let action = "upload"
 	let target
 	let target_path
+	let build_path
+	let libdaisy_path
 	let watch = false
 	let cpps = []
 	let samplerate = 48
@@ -369,27 +376,35 @@ function run() {
 			case "fastmath": options[arg] = true; break;
 
 			default: {
-				// assume anything else is a file path:
-				if (!fs.existsSync(arg)) {
-					console.log(`oopsy error: ${arg} is not a recognized argument or a path that does not exist`)
-					process.exit(-1)
+				if (arg.startsWith("--build_path=")) {
+					build_path = arg.split("=")[1]
 				}
-				if (fs.lstatSync(arg).isDirectory()) {
-					// add a whole folder full of cpps:
-					cpps = cpps.concat(fs.readdirSync(arg)
-						.filter(s => path.parse(s).ext == ".cpp")
-						.map(s => path.join(arg, s))
-					)
-				} else {
-					let p = path.parse(arg);
-					switch(p.ext) {
-						case ".json": {target_path = arg; target = ""}; break;
-						case ".cpp": cpps.push(arg); break;
-						// case ".gendsp":
-						// case ".maxpat":
-						// case ".maxhelp": {pat_path = arg}; break;
-						default: {
-							console.warn("unexpected input", arg);
+				else if (arg.startsWith("--libdaisy_path=")) {
+					libdaisy_path = arg.split("=")[1]
+				}
+				// assume anything else is a file path:
+				else {
+					if (!fs.existsSync(arg)) {
+						console.log(`oopsy error: ${arg} is not a recognized argument or a path that does not exist`)
+						process.exit(-1)
+					}
+					if (fs.lstatSync(arg).isDirectory()) {
+						// add a whole folder full of cpps:
+						cpps = cpps.concat(fs.readdirSync(arg)
+							.filter(s => path.parse(s).ext == ".cpp")
+							.map(s => path.join(arg, s))
+						)
+					} else {
+						let p = path.parse(arg);
+						switch (p.ext) {
+							case ".json": { target_path = arg; target = "" }; break;
+							case ".cpp": cpps.push(arg); break;
+							// case ".gendsp":
+							// case ".maxpat":
+							// case ".maxhelp": {pat_path = arg}; break;
+							default: {
+								console.warn("unexpected input", arg);
+							}
 						}
 					}
 				}
@@ -550,8 +565,18 @@ function run() {
 	let build_name = apps.map(v=>v.patch.name).join("_")
 
 	// configure build path:
-	const build_path = path.join(__dirname, `build_${build_name}_${target}`)
+	if (!build_path) {
+		build_path = path.join(__dirname, `build_${build_name}_${target}`)
+	}
 	console.log(`Building to ${build_path}`)
+
+	if (!libdaisy_path) {
+		libdaisy_path = path.join(__dirname, "libdaisy")
+	}
+	// normalize relative to buildpath
+	libdaisy_path = posixify_path(path.relative(build_path, libdaisy_path)).replace(" ", "\\ ")
+	console.log(`Using libDaisy at ${libdaisy_path}`)
+
 	// ensure build path exists:
 	fs.mkdirSync(build_path, {recursive: true});
 
@@ -608,8 +633,8 @@ ${hardware.app_type ? `APP_TYPE = ${hardware.app_type}` : ``}
 CPP_SOURCES = ${posixify_path(path.relative(build_path, maincpp_path).replace(" ", "\\ "))}
 ${includes.length > 0 ? `C_INCLUDES = ${includes.join('\\\n')}` : ``}
 # Library Locations
-LIBDAISY_DIR = ${(posixify_path(path.relative(build_path, path.join(__dirname, "libdaisy"))).replace(" ", "\\ "))}
-${hardware.defines.OOPSY_TARGET_USES_SDMMC ? `USE_FATFS = 1`:``}
+LIBDAISY_DIR = ${libdaisy_path}
+${hardware.defines.OOPSY_TARGET_USES_SDMMC ? `USE_FATFS = 1` : ``}
 # Optimize (i.e. CFLAGS += -O3):
 OPT = -O3
 # Core location, and generic Makefile.
