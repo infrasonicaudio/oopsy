@@ -590,13 +590,8 @@ namespace oopsy {
 					#ifdef OOPSY_TARGET_HAS_OLED
 					hardware.display.Fill(false);
 					#endif
-<<<<<<< HEAD
 					#ifdef OOPSY_TARGET_PETAL
 					hardware.led_driver.SetAllTo((uint8_t) 0);
-=======
-					#ifdef OOPSY_TARGET_PETAL
-					hardware.ClearLeds();
->>>>>>> be323af (Corrected SRAM allocation size)
 					#endif
 
 					if (menu_button_held_ms > OOPSY_LONG_PRESS_MS) {
@@ -611,12 +606,8 @@ namespace oopsy {
 					#endif
 					for(int i = 0; i < 8; i++) {
 						float white = (i == app_selecting || menu_button_released);
-<<<<<<< HEAD
 
 						SetRingLed(&hardware.led_driver, (daisy::DaisyPetal::RingLed)i,
-=======
-						hardware.SetRingLed((daisy::DaisyPetal::RingLed)i,
->>>>>>> be323af (Corrected SRAM allocation size)
 							(i == app_selected || white) * 1.f,
 							white * 1.f,
 							(i < app_count) * 0.3f + white * 1.f
@@ -624,7 +615,6 @@ namespace oopsy {
 					}
 					#endif //OOPSY_TARGET_PETAL
 
-<<<<<<< HEAD
 					// #ifdef OOPSY_TARGET_VERSIO
 					// // has no mode selection
 					// is_mode_selecting = 0;
@@ -641,24 +631,6 @@ namespace oopsy {
 					// 	);
 					// }
 					// #endif //OOPSY_TARGET_VERSIO
-=======
-					#ifdef OOPSY_TARGET_VERSIO
-					// has no mode selection
-					is_mode_selecting = 0;
-					#if defined(OOPSY_MULTI_APP)
-					// multi-app is always in menu mode:
-					mode = MODE_MENU;
-					#endif
-					for(int i = 0; i < 4; i++) {
-						float white = (i == app_selecting || menu_button_released);
-						hardware.SetLed(i,
-							(i == app_selected || white) * 1.f,
-							white * 1.f,
-							(i < app_count) * 0.3f + white * 1.f
-						);
-					}
-					#endif //OOPSY_TARGET_VERSIO
->>>>>>> be323af (Corrected SRAM allocation size)
 
 					// Handle encoder increment actions:
 					if (is_mode_selecting) {
