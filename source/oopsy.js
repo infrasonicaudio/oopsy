@@ -641,8 +641,7 @@ TARGET = ${build_name}
 # App type
 APP_TYPE = ${hardware.app_type}
 # Sources -- note, won't work with paths with spaces
-CPP_SOURCES = ${posixify_path(path.relative(build_path, maincpp_path).replace(" ", "\\ "))} \\
-${posixify_path(path.relative(build_path, path.join(__dirname, "petal_sm", "daisy_petal_125b_sm.cpp")))}
+CPP_SOURCES = ${posixify_path(path.relative(build_path, maincpp_path).replace(" ", "\\ "))}
 ${includes.length > 0 ? `C_INCLUDES = ${includes.join('\\\n')}` : ``}
 # Library Locations
 LIBDAISY_DIR = ${libdaisy_path}
