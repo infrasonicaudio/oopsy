@@ -55,7 +55,15 @@ static bool      update = false;
 #define OOPSY_SUPER_LONG_PRESS_MS (20000)
 #define OOPSY_DISPLAY_PERIOD_MS 10
 #define OOPSY_SCOPE_MAX_ZOOM (8)
-static const uint32_t OOPSY_SRAM_SIZE = 512 * 1024;
+
+// We need to reserve at least 1k heap for USB CDC malloc
+// For bootloader apps heap is in RAM_D2 which is only 256k
+#ifdef BOOT_APP
+static const uint32_t OOPSY_HEAP_SIZE = 256 * 1024 - 1024;
+#else
+static const uint32_t OOPSY_HEAP_SIZE = 512 * 1024 - 1024;
+#endif
+
 static const uint32_t OOPSY_SDRAM_SIZE = 64 * 1024 * 1024;
 
 // Pointer to the beginning of the SRAM heap
@@ -72,11 +80,8 @@ namespace oopsy {
 	char DSY_SDRAM_BSS sdram_pool[OOPSY_SDRAM_SIZE];
 
 	void init() {
-		if (!sram_pool) sram_pool = (char *)malloc(OOPSY_SRAM_SIZE);
-		// There's no guarantee the allocation will actually be
-		// of size "OOPSY_SRAM_SIZE," so this just clamps the
-		// usable space to what it really is.
-		sram_usable = (0x24080000 - 1024) - ((size_t) sram_pool);
+		if (!sram_pool) sram_pool = (char *)malloc(OOPSY_HEAP_SIZE);
+		sram_usable = OOPSY_HEAP_SIZE;
 		sram_used = 0;
 		sdram_usable = OOPSY_SDRAM_SIZE;
 		sdram_used = 0;
@@ -441,7 +446,7 @@ namespace oopsy {
 				log("%d%s/%dKB+%d%s/%dMB",
 					oopsy::sram_used > 1024 ? oopsy::sram_used/1024 : oopsy::sram_used,
 					(oopsy::sram_used > 1024 || oopsy::sram_used == 0) ? "" : "B",
-					OOPSY_SRAM_SIZE/1024,
+					OOPSY_HEAP_SIZE/1024,
 					oopsy::sdram_used > 1048576 ? oopsy::sdram_used/1048576 : oopsy::sdram_used/1024,
 					(oopsy::sdram_used > 1048576 || oopsy::sdram_used == 0) ? "" : "KB",
 					OOPSY_SDRAM_SIZE/1048576);
