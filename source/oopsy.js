@@ -705,10 +705,12 @@ ${hardware.struct}
 
 using json2daisy::Daisy;
 
+#include "${oopsy_src_path}/genlib_daisy.h"
+
+#include "${oopsy_src_path}/genlib_daisy.cpp"
+
 ${apps.map(app => `#include "${posixify_path(path.relative(build_path, app.path))}"`).join("\n")}
 ${hardware.inserts.filter(o => o.where == "header").map(o => o.code).join("\n")}
-#include "${oopsy_src_path}/genlib_daisy.h"
-#include "${oopsy_src_path}/genlib_daisy.cpp"
 
 ${apps.map(app => app.cpp.struct).join("\n")}
 
