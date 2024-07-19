@@ -317,6 +317,7 @@ function run() {
 	let target_path
 	let build_path
 	let libdaisy_path
+	let extra_flags = ""
 	let watch = false
 	let cpps = []
 	let samplerate = 48
@@ -382,6 +383,10 @@ function run() {
 				}
 				else if (arg.startsWith("--libdaisy_path=")) {
 					libdaisy_path = arg.split("=")[1]
+				}
+				else if (arg.startsWith("--extra_flags="))
+				{
+					extra_flags = arg.split("=")[1]
 				}
 				// assume anything else is a file path:
 				else {
@@ -654,8 +659,8 @@ include $(SYSTEM_FILES_DIR)/Makefile
 # Include the gen_dsp files
 CFLAGS+=-I"${posixify_path(path.relative(build_path, path.join(__dirname, "gen_dsp")))}"
 # Silence irritating warnings:
-CFLAGS+=-O3 -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
-CPPFLAGS+=-O3 -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
+CFLAGS+=-Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
+${extra_flags.length > 0 ? `# Additional User Flags\nCFLAGS+=${extra_flags}` : ``}
 
 `, "utf-8");
 
